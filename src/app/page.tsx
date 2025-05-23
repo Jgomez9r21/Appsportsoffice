@@ -18,7 +18,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { HOURLY_RATE_CATEGORIES } from '@/lib/config';
 import { cn } from "@/lib/utils";
-import { getServiceListings, type ServiceListing } from '@/services/service-listings'; // Assuming getServiceListings is adapted or created
+import { getServiceListings, type ServiceListing } from '@/services/service-listings';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from '@/context/AuthContext';
 
@@ -30,7 +30,7 @@ interface ServiceCategory {
 const serviceCategories: ServiceCategory[] = [
   { name: 'Todos', icon: Briefcase },
   { name: 'Tecnología', icon: CodeIcon },
-  { name: 'Entrenador Personal', icon: UserCircle }, // Changed to UserCircle to avoid conflict, can be Dumbbell too
+  { name: 'Entrenador Personal', icon: UserCircle },
   { name: 'Contratista', icon: ConstructionIcon },
   { name: 'Mantenimiento Hogar', icon: LucideHomeIcon },
   { name: 'Profesores', icon: School2Icon },
@@ -39,10 +39,10 @@ const serviceCategories: ServiceCategory[] = [
   { name: 'Video & Animación', icon: Camera },
   { name: 'Redacción & Traducción', icon: Edit },
   { name: 'Música & Audio', icon: Music },
-  { name: 'Finanzas', icon: BarChart }, // Re-using BarChart, consider DollarSign
+  { name: 'Finanzas', icon: BarChart },
   { name: 'Crecimiento Personal', icon: Lightbulb },
   { name: 'Seguridad', icon: Shield},
-  { name: 'Fotografía', icon: Camera }, // Re-using Camera
+  { name: 'Fotografía', icon: Camera },
 ];
 
 // Helper function to match service category with filter category
@@ -70,7 +70,7 @@ const FiltersContent = ({
              <Label htmlFor="service-category-select">Categoría del Servicio</Label>
              <Select value={currentFilterCategory} onValueChange={setCurrentFilterCategory}>
                  <SelectTrigger id="service-category-select">
-                     <SelectValue placeholder="Selecciona una categoría" />
+                     <SelectValue placeholder="Selecciona una categor\xeda" />
                  </SelectTrigger>
                  <SelectContent>
                      {serviceCategories.map(category => (
@@ -145,7 +145,7 @@ const FiltersContent = ({
 const ServiceListingsPageContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [favoritedItems, setFavoritedItems] = useState<Set<string>>(new Set());
+  // const [favoritedItems, setFavoritedItems] = useState<Set<string>>(new Set()); // Favorite state can be added back if needed
   const [serviceListings, setServiceListings] = useState<ServiceListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { openLoginDialog, isLoggedIn } = useAuth();
@@ -171,7 +171,6 @@ const ServiceListingsPageContent = () => {
         setServiceListings(listings);
       } catch (error) {
         console.error("Error fetching service listings:", error);
-        // Optionally, set an error state to display to the user
       } finally {
         setIsLoading(false);
       }
@@ -181,12 +180,11 @@ const ServiceListingsPageContent = () => {
 
 
   useEffect(() => {
-    // Sync current filter states with appliedFilters when sheet opens or appliedFilters change
     setCurrentFilterCategory(appliedFilters.category);
     setCurrentFilterLocation(appliedFilters.location);
     setCurrentFilterMinRating(appliedFilters.rating);
     setCurrentFilterMaxRate(appliedFilters.rate);
-  }, [appliedFilters, isSheetOpen]);
+  }, [appliedFilters]);
 
   const handleApplyFilters = useCallback(() => {
     setAppliedFilters({
@@ -212,23 +210,22 @@ const ServiceListingsPageContent = () => {
     return matchesCategory && matchesLocation && matchesRating && matchesRate && matchesSearch;
   });
 
-  const toggleFavorite = (itemId: string) => {
-     if (!isLoggedIn) {
-        openLoginDialog();
-        return;
-      }
-    setFavoritedItems(prevFavorites => {
-      const newFavorites = new Set(prevFavorites);
-      if (newFavorites.has(itemId)) {
-        newFavorites.delete(itemId);
-      } else {
-        newFavorites.add(itemId);
-      }
-      // Here you would typically also make an API call to save the favorite status
-      console.log("Favorited items (simulated):", newFavorites);
-      return newFavorites;
-    });
-  };
+  // const toggleFavorite = (itemId: string) => { // Favorite functionality can be added back if needed
+  //    if (!isLoggedIn) {
+  //       openLoginDialog();
+  //       return;
+  //     }
+  //   setFavoritedItems(prevFavorites => {
+  //     const newFavorites = new Set(prevFavorites);
+  //     if (newFavorites.has(itemId)) {
+  //       newFavorites.delete(itemId);
+  //     } else {
+  //       newFavorites.add(itemId);
+  //     }
+  //     console.log("Favorited items (simulated):", newFavorites);
+  //     return newFavorites;
+  //   });
+  // };
 
   return (
     <div className="flex flex-col h-full">
@@ -306,64 +303,39 @@ const ServiceListingsPageContent = () => {
                           />
                       </div>
                     </Link>
-                    <CardHeader className="p-4 pb-2">
-                        <div className="flex justify-between items-start gap-2">
-                            <div className="flex-grow">
-                                <CardTitle className="text-lg font-semibold">
-                                   <Link href={`/service/${service.id}`} className="hover:underline">
-                                      {service.title}
-                                    </Link>
-                                </CardTitle>
-                                <CardDescription className="text-sm text-muted-foreground line-clamp-1">{service.category}</CardDescription>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-muted-foreground hover:text-destructive flex-shrink-0 -mt-1 -mr-1"
-                              onClick={() => toggleFavorite(service.id)}
-                              aria-label={favoritedItems.has(service.id) ? "Quitar de favoritos" : "Añadir a favoritos"}
-                            >
-                              <Heart className={cn("h-5 w-5", favoritedItems.has(service.id) && "fill-destructive text-destructive")} />
-                            </Button>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="flex-grow p-4 pt-0 space-y-1.5">
-                        {service.professionalName && (
-                             <div className="flex items-center gap-2 text-sm mb-1">
-                                <Avatar className="h-6 w-6 border">
-                                    <AvatarImage src={service.professionalAvatar || undefined} alt={service.professionalName} data-ai-hint="professional avatar small"/>
-                                    <AvatarFallback className="text-xs">
-                                      {service.professionalName?.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() || <UserCircle className="h-3 w-3"/>}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <span className="text-foreground font-medium">{service.professionalName}</span>
-                            </div>
-                        )}
-                        <p className="text-xs text-muted-foreground line-clamp-2">
-                            {service.description}
+                    <CardContent className="flex-grow p-4 space-y-1">
+                        <CardTitle className="text-lg font-semibold line-clamp-1">
+                           <Link href={`/service/${service.id}`} className="hover:underline">
+                              {service.title}
+                            </Link>
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">{service.category}</p>
+                        <p className="text-sm">
+                            <span className="text-muted-foreground">Tarifa: </span>
+                            <span className="font-medium text-foreground">${service.rate.toLocaleString('es-CO')}</span>
+                            {HOURLY_RATE_CATEGORIES.includes(service.category) ? <span className="text-xs text-muted-foreground"> por hora</span> : <span className="text-xs text-muted-foreground"> /proyecto</span>}
                         </p>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-primary" />
-                            <span>{service.location}</span>
-                        </div>
-
-                        {service.rating && (
+                        {service.professionalName && (
+                            <p className="text-sm">
+                                <span className="text-muted-foreground">Profesional: </span>
+                                <span className="text-foreground">{service.professionalName}</span>
+                            </p>
+                        )}
+                         {service.rating && (
                             <div className="flex items-center gap-1 text-sm">
                                 <Star className="h-4 w-4 text-yellow-400 fill-yellow-400 flex-shrink-0" />
                                 <span className="font-semibold text-foreground">{service.rating.toFixed(1)}</span>
                             </div>
                         )}
-                    </CardContent>
-                    <CardFooter className="p-4 pt-2 border-t mt-auto bg-muted/30">
-                        <div className="flex justify-between items-center w-full">
-                             <p className="text-sm">
-                                Tarifa: <span className="font-bold text-lg text-primary">${service.rate.toLocaleString('es-CO')}</span>
-                                {HOURLY_RATE_CATEGORIES.includes(service.category) ? <span className="text-xs text-muted-foreground">/hr</span> : <span className="text-xs text-muted-foreground">/proyecto</span>}
-                            </p>
-                            <Button size="sm" className="h-8 text-xs sm:text-sm" asChild>
-                                <Link href={`/service/${service.id}`}>Ver Detalles</Link>
-                            </Button>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-primary" />
+                            <span>{service.location}</span>
                         </div>
+                    </CardContent>
+                    <CardFooter className="p-4 pt-2 border-t bg-muted/30">
+                        <Button size="sm" className="w-full h-9 text-sm" asChild>
+                            <Link href={`/service/${service.id}`}>Reservar Servicio</Link>
+                        </Button>
                     </CardFooter>
               </Card>
             ))}
