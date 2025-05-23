@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "site": "sportsofficeex.web.app",
+    "source": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
