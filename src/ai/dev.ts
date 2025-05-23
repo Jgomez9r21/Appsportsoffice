@@ -1,4 +1,2 @@
-import { config } from 'dotenv';
-config();
 
-import '@/ai/flows/suggest-freelancers.ts';
+// Flows will be imported for their side
